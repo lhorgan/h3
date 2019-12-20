@@ -15,6 +15,8 @@ class Earl {
         this.accessLogs = new NodeCache();
         
         this.readstream = new lineByLine(ifname);
+        this.urlCount = 0;
+        this.allLinesRead = false;
 
         this.go();
     }
@@ -64,14 +66,21 @@ class Earl {
                 this.writeURLs();
             }
 
+            this.processedURLIndex++;
+
             let [url, year] = this.getNextURL();
             if(url) {
                 worker.postMessage({"url": url, "queue": false, "year": year});
                 this.dispatchedURLIndex++;
-                this.processedURLIndex++;
             }
             else {
-                console.log("We've reached the end of the file.");
+                console.log("PROCSSED " + this.processedURLIndex + ", READ " + this.urlCount);
+                if(this.processedURLIndex === this.urlCount && this.allLinesRead) {
+                    console.log("All URLs have been processed!");
+                    for(let i = 0; i < this.workers.length; i++) {
+                        this.workers[i].terminate();
+                    }
+                }
                 this.writeURLs();
             }
         }
@@ -80,13 +89,16 @@ class Earl {
     getNextURL() {
         let line = this.readstream.next();
         if(line) {
-            //console.log("HERE IS OUR LINE ");
-            //console.log(line);
+            this.urlCount++;
             line =  line.toString("utf-8");
             let [url, year] = line.trim().split("\t");
             return [url, year];
         }
         else {
+            if(this.allLinesRead === false) {
+                console.log("End of file reached!");
+            }
+            this.allLinesRead = true;
             return [null, null];
         }
     }
@@ -97,7 +109,12 @@ class Earl {
         this.urlsToWrite = [];
         let urlStr = "";
         for(let i = 0; i < urlsCopy.length; i++) {
-            urlStr += urlsCopy[i].url + "\t" + urlsCopy[i].origURL + "\t" + urlsCopy[i].urlWithParams + "\t" + urlsCopy[i].year + "\t" + urlsCopy[i].error;
+            urlStr += urlsCopy[i].url + "\t" + 
+                      urlsCopy[i].origURL + "\t" + 
+                      urlsCopy[i].urlWithParams + "\t" + 
+                      urlsCopy[i].year + "\t" + 
+                      urlsCopy[i].size + "\t" + 
+                      urlsCopy[i].error;
             if(urlsCopy[i].error) {
                 //console.log("There has been an error, we are writing "  + urlsCopy[i].errorMessage);
                 urlStr += "\t" + '"' + urlsCopy[i].errorMessage + '"';
@@ -114,15 +131,15 @@ class Earl {
         console.log("ASSINGING WORKERS");
         for(let i = 0; i < this.binSize; i++) {
             for(let j = 0; j < this.workers.length; j++) {
-                //if(this.dispatchedURLIndex < this.urls.length) {
-                    let [url, year] = this.getNextURL(this.readstream);
+                let [url, year] = this.getNextURL(this.readstream);
+                if(url) {
                     console.log("URL: " + url);
                     this.workers[j].postMessage({"url": url, "queue": false, "year": year});
                     this.dispatchedURLIndex++;
-                //}
-                /*else {
-                    break;
-                }*/
+                }
+                else {
+                    //console.log("We have reached the end of the file");
+                }
             }
         }
 
@@ -132,4 +149,5 @@ class Earl {
     }
 }
 
-let e = new Earl("/media/luke/277eaea3-2185-4341-a594-d0fe5146d917/twitter_urls/todos/11226.tsv", "results/0.tsv", 50);
+//let e = new Earl("/media/luke/277eaea3-2185-4341-a594-d0fe5146d917/twitter_urls/todos/11226.tsv", "results/0.tsv", 50);
+let e = new Earl("results/strip.tsv", "results/0.tsv", 50);

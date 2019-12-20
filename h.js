@@ -100,7 +100,7 @@ class UrlProcessor {
             });
             entry.urlWithParams = entry.url;
 
-            // //console.log("We have succesffully followed the redirects");
+            //console.log("We have succesffully followed the redirects");
             
             /**
              * Read the contents of the page and parse the DOM with Cheerio
@@ -109,6 +109,7 @@ class UrlProcessor {
             entry["text"] = await this.getContent(entry.url).catch((err) => {
                 throw(err);
             });
+            entry["size"] = Buffer.byteLength(entry["text"], 'utf8');
 
             //console.log("We have successfully fetched the content");
 
@@ -144,6 +145,7 @@ class UrlProcessor {
                               "origURL": entry.origURL,
                               "urlWithParams": entry.urlWithParams,
                               "year": entry.year,
+                              "size": entry.size,
                               "error": false});
         } catch(err) {
             //console.log(err);
@@ -167,6 +169,7 @@ class UrlProcessor {
                                   "url": entry.url, 
                                   "origURL": entry.origURL, 
                                   "urlWithParams": entry.urlWithParams,
+                                  "size": entry.size,
                                   "year": entry.year,
                                   "error": true,
                                   "errorMessage": err});
@@ -277,8 +280,9 @@ class UrlProcessor {
             return new Promise((resolve, reject) => {
                 this.updateAccessLogs(url);
                 options["url"] = url;
-                options["headers"] = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36",
-                                      'Connection': 'keep-alive', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*'};
+                options["headers"] = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
+                                      'Connection': 'keep-alive', 'Accept-Language': 'en-US', 'Accept': '*/*'};
+                options["gzip"] = true;
                 let r = request(options, (err, resp, body) => {
                     if(err) {
                         //console.log(typeof(err.toString()));
