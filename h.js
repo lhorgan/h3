@@ -308,7 +308,7 @@ class UrlProcessor {
             timeToDelay *= (1 + Math.random());
 
             //console.log("DELAYING " + timeToDelay / 1000 + " milliseconds");
-            //await this.delay(timeToDelay / 1000);
+            await this.delay(timeToDelay);
             //console.log("Delay over");
             return this.hitURL(url, options);
         }

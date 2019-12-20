@@ -48,9 +48,9 @@ class Earl {
         //console.log(JSON.stringify(message));
         if(message["kind"] === "lastAccessed") {
             let domain = message["domain"];
-            let time = 0;
-            if(this.accessLogs.get(domain)) {
-                time = this.accessLogs[domain];
+            let time = this.accessLogs.get(domain);
+            if(!time) {
+                time = 0;
             }
             worker.postMessage({kind: "lastAccessed", mid: message["mid"], time: time});
         }
