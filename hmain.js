@@ -60,7 +60,7 @@ class Earl {
             this.accessLogs.set(domain, time, 5);
         }
         else if(message["kind"] === "writeURL") {
-            console.log(message.url + " --< " + message.origURL);
+            console.log(message.url + " --< " + message.origURL + ": " + this.processedURLIndex);
             this.urlsToWrite.push(message);
             if(this.urlsToWrite.length >= 50) {
                 this.writeURLs();
