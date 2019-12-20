@@ -4,6 +4,7 @@ const os = require('os');
 const { Worker } = require('worker_threads');
 const lineByLine = require('n-readlines');
 const NodeCache = require( "node-cache" );
+const URL = require('url');
 
 class Earl {
     constructor(ifname, results_name, binSize) {
@@ -92,7 +93,15 @@ class Earl {
             this.urlCount++;
             line =  line.toString("utf-8");
             let [url, year] = line.trim().split("\t");
-            return [url, year];
+            
+            let domain = this.getDomain(url);
+            if(this.accessLogs.get(domain)) {
+                console.log("Doing a skip...");
+                return this.getNextURL();
+            }
+            else {
+                return [url, year];
+            }
         }
         else {
             if(this.allLinesRead === false) {
@@ -146,6 +155,11 @@ class Earl {
         for(let i = 0; i < this.workers.length; i++) {
             this.workers[i].postMessage({"go": true});
         }
+    }
+
+    getDomain(url) {
+        let parsedURL = URL.parse(url);
+        return parsedURL.host;
     }
 }
 

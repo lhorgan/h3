@@ -276,7 +276,7 @@ class UrlProcessor {
     async hitURL(url, options) {
         let timeOfLastAccess = await this.lastAccessed(url);
         if(micro.now() - timeOfLastAccess > TIME_TO_WAIT) {
-            //console.log("Fantastic, hitting URL");
+            console.log("Fantastic, hitting URL");
             return new Promise((resolve, reject) => {
                 this.updateAccessLogs(url);
                 options["url"] = url;
@@ -307,9 +307,9 @@ class UrlProcessor {
             let timeToDelay = Math.max(TIME_TO_WAIT - (micro.now() - timeOfLastAccess), 0);
             timeToDelay *= (1 + Math.random());
 
-            //console.log("DELAYING " + timeToDelay / 1000 + " milliseconds");
-            await this.delay(timeToDelay);
-            //console.log("Delay over");
+            console.log("DELAYING " + timeToDelay / 1000 + " milliseconds");
+            await this.delay(timeToDelay / 1000);
+            console.log("Delay over");
             return this.hitURL(url, options);
         }
     }
