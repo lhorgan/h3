@@ -19,6 +19,9 @@ class Earl {
         this.urlCount = 0;
         this.allLinesRead = false;
 
+        this.slowpokes = 0;
+        this.backlog = []
+
         this.go();
     }
 
@@ -68,6 +71,12 @@ class Earl {
             }
 
             this.processedURLIndex++;
+            if(this.hasParams(message.origURL)) {
+                console.log("We processed a slowpoke!");
+                console.log("Slowpokes cont now at " + this.slowpokes);
+                console.log("Backlog at: " + this.backlog.length);
+                this.slowpokes--;
+            }
 
             let [url, year] = this.getNextURL();
             if(url) {
@@ -93,15 +102,7 @@ class Earl {
             this.urlCount++;
             line =  line.toString("utf-8");
             let [url, year] = line.trim().split("\t");
-            
-            let domain = this.getDomain(url);
-            if(this.accessLogs.get(domain)) {
-                console.log("Doing a skip...");
-                return this.getNextURL();
-            }
-            else {
-                return [url, year];
-            }
+            return [url, year];
         }
         else {
             if(this.allLinesRead === false) {
@@ -111,6 +112,78 @@ class Earl {
             return [null, null];
         }
     }
+
+    /*getNextURL(attempts) {
+        function eligible(u) {
+            let domain = _this.getDomain(u);
+            if(_this.accessLogs.get(domain)) {
+                return false;
+            }
+            else {
+                if(_this.hasParams(u)) {
+                    if(_this.slowpokes < 25) {
+                        _this.slowpokes++;
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        if(!attempts) {
+            attempts = 0;
+        }
+        else if(attempts > 3) {
+            if(this.backlog.length >= 0) {
+                return this.backlog[0];
+            }
+            else {
+                return [null, null];
+            }
+        }
+
+        let _this = this;
+    
+        for(let i = 0; i < 5; i++) {
+            if(i < this.backlog.length) {
+                let [url, year] = this.backlog[i];
+                let e = eligible(url);
+                if(e) {
+                    this.backlog.splice(i, 1);
+                    return [url, year];
+                }
+            }
+            else {
+                break;
+            }
+        }
+
+        let line = this.readstream.next();
+        if(line) {
+            this.urlCount++;
+            line =  line.toString("utf-8");
+            let [url, year] = line.trim().split("\t");
+            
+            let domain = this.getDomain(url);
+            if(eligible(url)) {
+                return [url, year];
+            }
+            else {
+                this.backlog.push([url, year]);
+            }
+        }
+        else {
+            if(this.allLinesRead === false) {
+                console.log("End of file reached!");
+            }
+            this.allLinesRead = true;
+        }
+
+        return this.getNextURL(attempts + 1);
+    }*/
 
     writeURLs() {
         //console.log("Writing a batch of URLs");
@@ -161,7 +234,15 @@ class Earl {
         let parsedURL = URL.parse(url);
         return parsedURL.host;
     }
+
+    hasParams(url) {
+        let parsedURL = URL.parse(url);
+        if(parsedURL.query) {
+            return true;
+        }
+        return false;
+    }
 }
 
 //let e = new Earl("/media/luke/277eaea3-2185-4341-a594-d0fe5146d917/twitter_urls/todos/11226.tsv", "results/0.tsv", 50);
-let e = new Earl("results/strip.tsv", "results/0.tsv", 50);
+let e = new Earl("/media/luke/277eaea3-2185-4341-a594-d0fe5146d917/twitter_urls/todos/17552.tsv", "results/0.tsv", 50);
