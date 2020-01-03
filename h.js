@@ -267,26 +267,33 @@ class UrlProcessor {
         });
     }
 
-    updateAccessLogs(url) {
+    updateAccessLogs(url, proxy) {
         let domain = this.getDomain(url);
 
-        this.postMessage({"kind": "updateAccessLogs", "domain": domain, "time": micro.now()});
+        this.postMessage({"kind": "updateAccessLogs", "domain": domain, "time": micro.now(), "proxy": proxy});
     }
 
     async hitURL(url, options) {
-        let timeOfLastAccess = await this.lastAccessed(url);
+        //console.log("Attempting to hit " + url);
+        let [proxy, timeOfLastAccess] = await this.lastAccessed(url);
+        //console.log("Here is our proxy: " + proxy);
+        //console.log("TIME OF LAST ACCESS: " + timeOfLastAccess);
+
         if(micro.now() - timeOfLastAccess > TIME_TO_WAIT) {
             //console.log("Fantastic, hitting URL");
             return new Promise((resolve, reject) => {
-                this.updateAccessLogs(url);
+                this.updateAccessLogs(url, proxy);
                 options["url"] = url;
                 options["headers"] = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
                                       'Connection': 'keep-alive', 'Accept-Language': 'en-US', 'Accept': '*/*'};
                 options["gzip"] = true;
+                options["proxy"] = "http://" + proxy + ":8888";
+                //console.log("The hit begins");
                 let r = request(options, (err, resp, body) => {
                     if(err) {
                         //console.log(typeof(err.toString()));
                         //console.log(err.toString());
+                        //console.log(err + " trying to hit " + url);
                         reject(err.toString());
                     }
                     else if(resp.statusCode >= 400) {

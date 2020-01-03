@@ -4,6 +4,10 @@ const os = require('os');
 const { Worker } = require('worker_threads');
 const lineByLine = require('n-readlines');
 const NodeCache = require( "node-cache" );
+const shuffle = require('shuffle-array');
+
+const micro = require("microtime");
+const TIME_TO_WAIT = 1000000;
 
 class Earl {
     constructor(ifname, results_name, binSize) {
@@ -17,6 +21,26 @@ class Earl {
         this.readstream = new lineByLine(ifname);
         this.urlCount = 0;
         this.allLinesRead = false;
+
+        this.proxies = ["3.19.237.27",
+                        "18.216.8.236",
+                        "18.188.159.30",
+                        "3.15.8.177",
+                        "52.14.59.54",
+                        "3.135.244.120",
+                        "3.16.218.7",
+                        "3.17.152.133",
+                        "18.189.6.59",
+                        "52.14.87.244",
+                        "3.15.166.221",
+                        "18.221.91.167",
+                        "3.16.136.242",
+                        "3.17.153.127",
+                        "3.136.106.186",
+                        "3.14.149.157",
+                        "3.136.85.74",
+                        "18.221.242.150",
+                        "13.59.171.154"];
 
         this.go();
     }
@@ -48,16 +72,17 @@ class Earl {
         //console.log(JSON.stringify(message));
         if(message["kind"] === "lastAccessed") {
             let domain = message["domain"];
-            let time = this.accessLogs.get(domain);
-            if(!time) {
-                time = 0;
-            }
-            worker.postMessage({kind: "lastAccessed", mid: message["mid"], time: time});
+            let proxy, time = this.getBestProxy(domain);
+
+            this.getBestProxy(domain);
+
+            worker.postMessage({kind: "lastAccessed", mid: message["mid"], time: time, proxy: proxy});
         }
         else if(message["kind"] === "updateAccessLogs") {
             let domain = message["domain"];
             let time = message["time"];
-            this.accessLogs.set(domain, time, 5);
+            let proxy = message["proxy"];
+            this.accessLogs.set(domain + ":" + proxy, time, 5);
         }
         else if(message["kind"] === "writeURL") {
             console.log(message.url + " --< " + message.origURL + ": " + this.processedURLIndex);
@@ -84,6 +109,24 @@ class Earl {
                 this.writeURLs();
             }
         }
+    }
+
+    getBestProxy(domain) {
+        let proxies = shuffle(this.proxies);
+        let res = [];
+
+        for(let i = 0; i < proxies.length; i++) {
+            let time = this.accessLogs.get(domain + ":" + proxies[i]);
+            if(!time) {
+                time = 0;
+            }
+            res = [proxies[i], time];
+            if((micro.now() - time) > TIME_TO_WAIT) {
+                return res;
+            }
+        }
+
+        return res;
     }
 
     getNextURL() {
@@ -150,4 +193,4 @@ class Earl {
 }
 
 //let e = new Earl("/media/luke/277eaea3-2185-4341-a594-d0fe5146d917/twitter_urls/todos/11226.tsv", "results/0.tsv", 50);
-let e = new Earl("results/strip.tsv", "results/0.tsv", 50);
+let e = new Earl("/media/luke/277eaea3-2185-4341-a594-d0fe5146d917/twitter_urls/todos/5492.tsv", "results/0.tsv", 50);
