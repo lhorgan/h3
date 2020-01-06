@@ -317,7 +317,7 @@ class UrlProcessor {
                 }).on('data', function(data) {
                     responseSize += data.length;
                     if(responseSize >= MAX_RESP_BYTES) {
-                        console.log("Too many bytes downloaded from " + url + ".  Aborting!");
+                        console.log("Too many bytes (" + responseSize + ") downloaded from " + url + ".  Aborting!");
                         r.abort();
                         reject("File too large.");
                     }
