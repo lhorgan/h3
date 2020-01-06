@@ -85,7 +85,9 @@ class Earl {
             this.accessLogs.set(domain + ":" + proxy, time, 5);
         }
         else if(message["kind"] === "writeURL") {
-            console.log(message.url + " --< " + message.origURL + ": " + this.processedURLIndex);
+            if(this.processedURLIndex % 500 === 0) {
+                console.log(message.url + " --< " + message.origURL + ": " + this.processedURLIndex);
+            }
             this.urlsToWrite.push(message);
             if(this.urlsToWrite.length >= 50) {
                 this.writeURLs();
