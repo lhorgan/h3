@@ -6,6 +6,7 @@ const difflib = require('difflib');
 
 const TIME_TO_WAIT = 1000000;
 const TIMEOUT = 10000;
+const MAX_RESP_BYTES = 1500000;
 
 const { Worker, isMainThread, parentPort } = require('worker_threads');
 
@@ -297,6 +298,7 @@ class UrlProcessor {
                 options["gzip"] = true;
                 options["proxy"] = "http://" + proxy + ":8888";
                 //console.log("The hit begins");
+                let responseSize = 0;
                 let r = request(options, (err, resp, body) => {
                     if(err) {
                         //console.log(typeof(err.toString()));
@@ -311,6 +313,13 @@ class UrlProcessor {
                     else {
                         //console.log("RESOLVING URL, yay!")
                         resolve([resp, body]);
+                    }
+                }).on('data', function(data) {
+                    responseSize += data.length;
+                    if(responseSize >= MAX_RESP_BYTES) {
+                        console.log("Too many bytes downloaded from " + url + ".  Aborting!");
+                        r.abort();
+                        reject("File too large.");
                     }
                 });
                 //console.log("HERE ARE OUR HEADERS ");
