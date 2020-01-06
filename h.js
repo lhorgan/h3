@@ -186,6 +186,8 @@ class UrlProcessor {
                 this.process(entry);
             }
         }
+
+        entry = null;
     }
 
     /**
