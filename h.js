@@ -299,6 +299,7 @@ class UrlProcessor {
                 options["proxy"] = "http://" + proxy + ":8888";
                 //console.log("The hit begins");
                 let responseSize = 0;
+                let aborted = false; // just to prevent repeat aborts while the file keeps downloading
                 let r = request(options, (err, resp, body) => {
                     if(err) {
                         //console.log(typeof(err.toString()));
@@ -316,7 +317,8 @@ class UrlProcessor {
                     }
                 }).on('data', function(data) {
                     responseSize += data.length;
-                    if(responseSize >= MAX_RESP_BYTES) {
+                    if(responseSize >= MAX_RESP_BYTES && !aborted) {
+                        aborted = true;
                         console.log("Too many bytes (" + responseSize + ") downloaded from " + url + ".  Aborting!");
                         r.abort();
                         reject("File too large.");
