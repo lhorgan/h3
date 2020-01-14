@@ -29,11 +29,11 @@ class UrlProcessor {
         }
         this.queue = [];
 
-        setInterval(() => {
+        /*setInterval(() => {
             console.log("this.errors: " + Object.keys(this.errors).length);
             console.log("this.callbacks: " + Object.keys(this.callbacks).length);
             console.log("this.queue: " + this.queue.length);
-        }, 5000);
+        }, 5000);*/
     }
 
     // url --> original url, new url

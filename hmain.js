@@ -85,7 +85,7 @@ class Earl {
             this.accessLogs.set(domain + ":" + proxy, time, 5);
         }
         else if(message["kind"] === "writeURL") {
-            if(this.processedURLIndex % 500 === 0) {
+            if(this.processedURLIndex % 1 === 0) {
                 console.log(message.url + " --< " + message.origURL + ": " + this.processedURLIndex);
             }
             this.urlsToWrite.push(message);
@@ -195,4 +195,4 @@ class Earl {
 }
 
 //let e = new Earl("/media/luke/277eaea3-2185-4341-a594-d0fe5146d917/twitter_urls/todos/11226.tsv", "results/0.tsv", 50);
-let e = new Earl("../xaa", "../res.tsv", 50);
+let e = new Earl("../xaa", "../res.tsv", 5000);
