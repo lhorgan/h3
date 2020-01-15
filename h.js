@@ -48,8 +48,8 @@ class UrlProcessor {
                                     });
 
         let newURL = resp.headers.location;//resp.request.uri.href;
-        if(resp.statusCode >= 300 && resp.statusCode < 400 && newURL) {
-            //console.log("HERE IS OUR NEW URL " + newURL);
+        if(resp.status >= 300 && resp.status < 400 && newURL) {
+            console.log("HERE IS OUR NEW URL " + newURL);
             let parsedNew = URL.parse(newURL);
             if(!parsedNew.hostname && parsedNew.path) {
                 let path = parsedNew.path;
@@ -310,11 +310,11 @@ class UrlProcessor {
                 if(error.response) {
                     // The request was made and the server responded with a status code
                     // that falls out of the range of 2xx
-                    console.log("Response error on " + url + ": " + error.response.status + ", " + error.response.data);
                     if(error.response.statusCode < 400) {
                         return [error.response, error.response.data];
                     }
                     else {
+                        console.log("Response error on " + url + ": " + error.response.status + ", " + error.response.data);
                         throw error.status;
                     }
                 } 
