@@ -310,7 +310,7 @@ class UrlProcessor {
                 if(error.response) {
                     // The request was made and the server responded with a status code
                     // that falls out of the range of 2xx
-                    console.log("Error on " + url + ": " + error.response.status);
+                    console.log("Error on " + url + ": " + error.response.status + ", " + error.response.data);
 
                     return error.status;
                 } 
