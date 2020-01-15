@@ -48,8 +48,9 @@ class UrlProcessor {
                                     });
         
         console.log("Rredirects followed!");
-        console.log(resp);
-        console.log(body);                             
+        console.log("THE STATUS CODE " + resp.status);
+        //console.log(resp);
+        //console.log(body);                             
         let newURL = resp.headers.location;//resp.request.uri.href;
         console.log("headers");
         console.log(resp.headers);
