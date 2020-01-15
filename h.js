@@ -43,7 +43,7 @@ class UrlProcessor {
         //console.log("FOLLOWING REDIRECTS FOR " + entry.url + " orig url " + entry.origURL);
         let [resp, body] = await this.hitURL(entry.url, {
                                         method: "head",
-                                        maxRedirects: 1,
+                                        maxRedirects: 0,
                                         timeout: TIMEOUT
                                     });
 
@@ -303,12 +303,12 @@ class UrlProcessor {
             await axios(options)
             .then(function (response) {
 		console.log("We succeeded on " + url);
-		console.log(response.data);
+		//console.log(response.data);
                 return [response, response.data];
             })
             .catch(function (error) {
 		console.log("We had an error on " + url);
-		console.log(error);
+		//console.log(error);
                 return error;
             });
         }
