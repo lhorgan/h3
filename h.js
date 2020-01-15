@@ -48,6 +48,8 @@ class UrlProcessor {
                                     });
 
         let newURL = resp.headers.location;//resp.request.uri.href;
+        console.log("headers");
+        console.log(resp.headers);
         if(resp.status >= 300 && resp.status < 400 && newURL) {
             console.log("HERE IS OUR NEW URL " + newURL);
             let parsedNew = URL.parse(newURL);
