@@ -310,7 +310,7 @@ class UrlProcessor {
                 if(error.response) {
                     // The request was made and the server responded with a status code
                     // that falls out of the range of 2xx
-                    console.log("Error on " + url + ": " + error.response.status + ", " + error.response.data);
+                    console.log("Response error on " + url + ": " + error.response.status + ", " + error.response.data);
 
                     return error.status;
                 } 
@@ -318,12 +318,12 @@ class UrlProcessor {
                     // The request was made but no response was received
                     // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
                     // http.ClientRequest in node.js
-                    console.log("Error on " + url + ": " + error.request);
+                    console.log("Request error on " + url + ": " + error.request);
                     return error.requset;
                 } 
                 else {
                     // Something happened in setting up the request that triggered an Error
-                    console.log("Error on " + url + ": " + error.message);
+                    console.log("Other error on " + url + ": " + error.message);
                     return error.message;
                 }
             });
