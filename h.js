@@ -8,7 +8,7 @@ const TIME_TO_WAIT = 1000000;
 const TIMEOUT = 10000;
 const MAX_RESP_BYTES = 1500000;
 
-const axios = require('axios').default;
+const axios = require('axios-https-proxy-fix');
 
 const { Worker, isMainThread, parentPort } = require('worker_threads');
 
@@ -40,22 +40,22 @@ class UrlProcessor {
 
     // url --> original url, new url
     async followRedirects(entry) {
-        console.log("FOLLOWING REDIRECTS FOR " + entry.url + " orig url " + entry.origURL);
+        //console.log("FOLLOWING REDIRECTS FOR " + entry.url + " orig url " + entry.origURL);
         let [resp, body] = await this.hitURL(entry.url, {
                                         method: "head",
                                         maxRedirects: 0,
                                         timeout: TIMEOUT
                                     });
         
-        console.log("Rredirects followed!");
-        console.log("THE STATUS CODE " + resp.status);
+        //console.log("Rredirects followed!");
+        //console.log("THE STATUS CODE " + resp.status);
         //console.log(resp);
         //console.log(body);                             
         let newURL = resp.headers.location;//resp.request.uri.href;
-        console.log("headers");
-        console.log(resp.headers);
+        // console.log("headers");
+        //console.log(resp.headers);
         if(resp.status >= 300 && resp.status < 400 && newURL) {
-            console.log("HERE IS OUR NEW URL " + newURL);
+            //console.log("HERE IS OUR NEW URL " + newURL);
             let parsedNew = URL.parse(newURL);
             if(!parsedNew.hostname && parsedNew.path) {
                 let path = parsedNew.path;
@@ -277,7 +277,7 @@ class UrlProcessor {
         //console.log("Hi, so, we are accessing a time for " + url);
         return new Promise((resolve) => {
             this.postMessage({"kind": "lastAccessed", "domain": domain}, (data) => {
-                //console.log("Here is the time we read " + data.time);
+                //wconsole.log("Here is the time we read " + data.time);
                 resolve(data.time);
             });
         });
@@ -309,7 +309,7 @@ class UrlProcessor {
             return new Promise(async(resolve, reject) => {
                 await axios(options)
                 .then(function (response) {
-                    console.log("We succeeded on " + url);
+                    //console.log("We succeeded on " + url);
                     //console.log(response.data);
                     resolve([response, response.data]);
                 })
@@ -318,11 +318,12 @@ class UrlProcessor {
                         // The request was made and the server responded with a status code
                         // that falls out of the range of 2xx
                         if(error.response.status < 400) {
-                            console.log("this counts as success, and we are returning.");
+                            //console.log("this counts as success, and we are returning.");
                             resolve([error.response, error.response.data]);
                         }
                         else {
-                            console.log("Response error on " + url + ": " + error.response.status + ", " + error.response.data);
+                            //console.log("Response error on " + url + ": " + error.response.status + ", " + error.response.data);
+			    //console.log(error);
                             reject(error.response.status);
                         }
                     } 
@@ -330,12 +331,12 @@ class UrlProcessor {
                         // The request was made but no response was received
                         // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
                         // http.ClientRequest in node.js
-                        console.log("Request error on " + url + ": " + JSON.stringify(error.request));
+                        //console.log("Request error on " + url + ": " + JSON.stringify(error.request));
                         reject(JSON.stringify(error.request));
                     } 
                     else {
                         // Something happened in setting up the request that triggered an Error
-                        console.log("Other error on " + url + ": " + error.message);
+                        //console.log("Other error on " + url + ": " + error.message);
                         reject(error.message);
                     }
                 });
