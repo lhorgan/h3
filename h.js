@@ -323,15 +323,15 @@ class UrlProcessor {
                         }
                         else {
                             console.log("Response error on " + url + ": " + error.response.status + ", " + error.response.data);
-                            reject(error.status);
+                            reject(error.response.status);
                         }
                     } 
                     else if(error.request) {
                         // The request was made but no response was received
                         // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
                         // http.ClientRequest in node.js
-                        console.log("Request error on " + url + ": " + error.request);
-                        reject(error.request);
+                        console.log("Request error on " + url + ": " + JSON.stringify(error.request));
+                        reject(JSON.stringify(error.request));
                     } 
                     else {
                         // Something happened in setting up the request that triggered an Error
