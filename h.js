@@ -289,49 +289,21 @@ class UrlProcessor {
 
         if(micro.now() - timeOfLastAccess > TIME_TO_WAIT) {
             //console.log("Fantastic, hitting URL");
-            return new Promise((resolve, reject) => {
-                this.updateAccessLogs(url, proxy);
-                options["url"] = url;
-                options["headers"] = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
-                                      'Connection': 'keep-alive', 'Accept-Language': 'en-US', 'Accept': '*/*'};
-                //options["gzip"] = true;
-                options["proxy"] = {"host": "http://" + port, "port": "8888"};
-                options["maxContentLength"] = MAX_RESP_BYTES;
-                options["timeout"] = TIMEOUT;
-                //console.log("The hit begins");
-                let responseSize = 0;
-                let aborted = false; // just to prevent repeat aborts while the file keeps downloading
-                /*let r = request(options, (err, resp, body) => {
-                    if(err) {
-                        //console.log(typeof(err.toString()));
-                        //console.log(err.toString());
-                        //console.log(err + " trying to hit " + url);
-                        reject(err.toString());
-                    }
-                    else if(resp.statusCode >= 400) {
-                        //console.log("WE HIT AN ERROR CODE");
-                        reject("Status code: " + resp.statusCode);
-                    }
-                    else {
-                        //console.log("RESOLVING URL, yay!")
-                        resolve([resp, body]);
-                    }
-                }).on('data', function(data) {
-                    responseSize += data.length;
-                    if(responseSize >= MAX_RESP_BYTES && !aborted) {
-                        aborted = true;
-                        console.log("Too many bytes (" + responseSize + ") downloaded from " + url + ".  Aborting!");
-                        r.abort();
-                        reject("File too large.");
-                    }
-                });*/
-                await axios(options)
-                .then(function (response) {
-                    resolve([response, response.data]);
-                  })
-                  .catch(function (error) {
-                    reject(error);
-                  })
+            this.updateAccessLogs(url, proxy);
+            options["url"] = url;
+            options["headers"] = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
+                                    'Connection': 'keep-alive', 'Accept-Language': 'en-US', 'Accept': '*/*'};
+            //options["gzip"] = true;
+            options["proxy"] = {"host": "http://" + port, "port": "8888"};
+            options["maxContentLength"] = MAX_RESP_BYTES;
+            options["timeout"] = TIMEOUT;
+
+            await axios(options)
+            .then(function (response) {
+                return [response, response.data];
+            })
+            .catch(function (error) {
+                return error;
             });
         }
         else {
