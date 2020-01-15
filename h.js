@@ -40,9 +40,8 @@ class UrlProcessor {
     async followRedirects(entry) {
         //console.log("FOLLOWING REDIRECTS FOR " + entry.url + " orig url " + entry.origURL);
         let [resp, body] = await this.hitURL(entry.url, {
-                                        method: "HEAD",
-                                        followAllRedirects: false,
-                                        followRedirect: false,
+                                        method: "head",
+                                        maxRedirects: 1,
                                         timeout: TIMEOUT
                                     });
 
@@ -295,12 +294,14 @@ class UrlProcessor {
                 options["url"] = url;
                 options["headers"] = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
                                       'Connection': 'keep-alive', 'Accept-Language': 'en-US', 'Accept': '*/*'};
-                options["gzip"] = true;
-                options["proxy"] = "http://" + proxy + ":8888";
+                //options["gzip"] = true;
+                options["proxy"] = {"host": "http://" + port, "port": "8888"};
+                options["maxContentLength"] = MAX_RESP_BYTES;
+                options["timeout"] = TIMEOUT;
                 //console.log("The hit begins");
                 let responseSize = 0;
                 let aborted = false; // just to prevent repeat aborts while the file keeps downloading
-                let r = request(options, (err, resp, body) => {
+                /*let r = request(options, (err, resp, body) => {
                     if(err) {
                         //console.log(typeof(err.toString()));
                         //console.log(err.toString());
@@ -323,9 +324,14 @@ class UrlProcessor {
                         r.abort();
                         reject("File too large.");
                     }
-                });
-                //console.log("HERE ARE OUR HEADERS ");
-                //console.log(r.headers);
+                });*/
+                await axios(options)
+                .then(function (response) {
+                    resolve([response, response.data]);
+                  })
+                  .catch(function (error) {
+                    reject(error);
+                  })
             });
         }
         else {
