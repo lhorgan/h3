@@ -8,6 +8,8 @@ const TIME_TO_WAIT = 1000000;
 const TIMEOUT = 10000;
 const MAX_RESP_BYTES = 1500000;
 
+const axios = require('axios').default;
+
 const { Worker, isMainThread, parentPort } = require('worker_threads');
 
 class UrlProcessor {
