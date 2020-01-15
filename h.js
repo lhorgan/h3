@@ -305,37 +305,39 @@ class UrlProcessor {
             options["maxContentLength"] = MAX_RESP_BYTES;
             options["timeout"] = TIMEOUT;
 
-            await axios(options)
-            .then(function (response) {
-                console.log("We succeeded on " + url);
-                //console.log(response.data);
-                Promise.resolve([response, response.data]);
-            })
-            .catch(function (error) {
-                if(error.response) {
-                    // The request was made and the server responded with a status code
-                    // that falls out of the range of 2xx
-                    if(error.response.status < 400) {
-                        console.log("this counts as success, and we are returning.");
-                        Promise.resolve([error.response, error.response.data]);
-                    }
+            return new Promise((resolve, reject) => {
+                await axios(options)
+                .then(function (response) {
+                    console.log("We succeeded on " + url);
+                    //console.log(response.data);
+                    resolve([response, response.data]);
+                })
+                .catch(function (error) {
+                    if(error.response) {
+                        // The request was made and the server responded with a status code
+                        // that falls out of the range of 2xx
+                        if(error.response.status < 400) {
+                            console.log("this counts as success, and we are returning.");
+                            resolve([error.response, error.response.data]);
+                        }
+                        else {
+                            console.log("Response error on " + url + ": " + error.response.status + ", " + error.response.data);
+                            reject(error.status);
+                        }
+                    } 
+                    else if(error.request) {
+                        // The request was made but no response was received
+                        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                        // http.ClientRequest in node.js
+                        console.log("Request error on " + url + ": " + error.request);
+                        reject(error.requset);
+                    } 
                     else {
-                        console.log("Response error on " + url + ": " + error.response.status + ", " + error.response.data);
-                        Promise.reject(error.status);
+                        // Something happened in setting up the request that triggered an Error
+                        console.log("Other error on " + url + ": " + error.message);
+                        reject(error.message);
                     }
-                } 
-                else if(error.request) {
-                    // The request was made but no response was received
-                    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-                    // http.ClientRequest in node.js
-                    console.log("Request error on " + url + ": " + error.request);
-                    Promise.reject(error.requset);
-                } 
-                else {
-                    // Something happened in setting up the request that triggered an Error
-                    console.log("Other error on " + url + ": " + error.message);
-                    Promise.reject(error.message);
-                }
+                });
             });
         }
         else {
