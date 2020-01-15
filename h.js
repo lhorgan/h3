@@ -305,7 +305,7 @@ class UrlProcessor {
             options["maxContentLength"] = MAX_RESP_BYTES;
             options["timeout"] = TIMEOUT;
 
-            return new Promise((resolve, reject) => {
+            return new Promise(async(resolve, reject) => {
                 await axios(options)
                 .then(function (response) {
                     console.log("We succeeded on " + url);
