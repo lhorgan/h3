@@ -40,13 +40,16 @@ class UrlProcessor {
 
     // url --> original url, new url
     async followRedirects(entry) {
-        //console.log("FOLLOWING REDIRECTS FOR " + entry.url + " orig url " + entry.origURL);
+        console.log("FOLLOWING REDIRECTS FOR " + entry.url + " orig url " + entry.origURL);
         let [resp, body] = await this.hitURL(entry.url, {
                                         method: "head",
                                         maxRedirects: 0,
                                         timeout: TIMEOUT
                                     });
-
+        
+        console.log("Rredirects followed!");
+        console.log(resp);
+        console.log(body);                             
         let newURL = resp.headers.location;//resp.request.uri.href;
         console.log("headers");
         console.log(resp.headers);
