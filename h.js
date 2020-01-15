@@ -316,6 +316,7 @@ class UrlProcessor {
                     // The request was made and the server responded with a status code
                     // that falls out of the range of 2xx
                     if(error.response.statusCode < 400) {
+                        console.log("this counts as success, and we are returning.");
                         return [error.response, error.response.data];
                     }
                     else {
