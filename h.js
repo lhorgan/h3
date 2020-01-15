@@ -302,14 +302,30 @@ class UrlProcessor {
 
             await axios(options)
             .then(function (response) {
-		console.log("We succeeded on " + url);
-		//console.log(response.data);
+                console.log("We succeeded on " + url);
+                //console.log(response.data);
                 return [response, response.data];
             })
             .catch(function (error) {
-		console.log("We had an error on " + url);
-		//console.log(error);
-                return error;
+                if(error.response) {
+                    // The request was made and the server responded with a status code
+                    // that falls out of the range of 2xx
+                    console.log("Error on " + url + ": " + error.response.status);
+
+                    return error.status;
+                } 
+                else if(error.request) {
+                    // The request was made but no response was received
+                    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                    // http.ClientRequest in node.js
+                    console.log("Error on " + url + ": " + error.request);
+                    return error.requset;
+                } 
+                else {
+                    // Something happened in setting up the request that triggered an Error
+                    console.log("Error on " + url + ": " + error.message);
+                    return error.message;
+                }
             });
         }
         else {
