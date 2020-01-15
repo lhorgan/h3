@@ -309,7 +309,7 @@ class UrlProcessor {
             .then(function (response) {
                 console.log("We succeeded on " + url);
                 //console.log(response.data);
-                return [response, response.data];
+                Promise.resolve([response, response.data]);
             })
             .catch(function (error) {
                 if(error.response) {
@@ -317,11 +317,11 @@ class UrlProcessor {
                     // that falls out of the range of 2xx
                     if(error.response.status < 400) {
                         console.log("this counts as success, and we are returning.");
-                        return [error.response, error.response.data];
+                        Promise.resolve([error.response, error.response.data]);
                     }
                     else {
                         console.log("Response error on " + url + ": " + error.response.status + ", " + error.response.data);
-                        throw error.status;
+                        Promise.reject(error.status);
                     }
                 } 
                 else if(error.request) {
@@ -329,12 +329,12 @@ class UrlProcessor {
                     // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
                     // http.ClientRequest in node.js
                     console.log("Request error on " + url + ": " + error.request);
-                    throw error.requset;
+                    Promise.reject(error.requset);
                 } 
                 else {
                     // Something happened in setting up the request that triggered an Error
                     console.log("Other error on " + url + ": " + error.message);
-                    throw error.message;
+                    Promise.reject(error.message);
                 }
             });
         }
