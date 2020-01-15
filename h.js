@@ -9,6 +9,7 @@ const TIMEOUT = 10000;
 const MAX_RESP_BYTES = 1500000;
 
 const axios = require('axios-https-proxy-fix');
+const {parse, stringify} = require('flatted/cjs');
 
 const { Worker, isMainThread, parentPort } = require('worker_threads');
 
@@ -332,7 +333,7 @@ class UrlProcessor {
                         // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
                         // http.ClientRequest in node.js
                         //console.log("Request error on " + url + ": " + JSON.stringify(error.request));
-                        reject(error.request);
+                        reject(JSON.stringify(error.request));
                     } 
                     else {
                         // Something happened in setting up the request that triggered an Error
