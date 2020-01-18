@@ -10,6 +10,8 @@ const MAX_RESP_BYTES = 1500000;
 
 const { Worker, isMainThread, parentPort } = require('worker_threads');
 
+process.env.UV_THREADPOOL_SIZE=32;
+
 class UrlProcessor {
     constructor() {
         this.errors = {};
