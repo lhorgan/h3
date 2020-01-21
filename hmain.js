@@ -137,6 +137,9 @@ class Earl {
             this.urlCount++;
             line =  line.toString("utf-8");
             let [url, year] = line.trim().split("\t");
+            if(!year) {
+                year = 2020;
+            }
             return [url, year];
         }
         else {
