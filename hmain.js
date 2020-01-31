@@ -21,30 +21,9 @@ class Earl {
         this.readstream = new lineByLine(ifname);
         this.urlCount = 0;
         this.allLinesRead = false;
-
-        /*this.proxies = ["172.31.19.100",
-			"172.31.9.14",
-			"172.31.18.201",
-			"172.31.27.19",
-			"172.31.27.168",
-			"172.31.26.89",
-			"172.31.21.225",
-			"172.31.26.57",
-			"172.31.28.69",
-			"172.31.18.13",
-			"172.31.30.0",
-			"172.31.19.127",
-			"172.31.17.235",
-			"172.31.23.122",
-			"172.31.31.89",
-			"172.31.21.215",
-			"172.31.26.181",
-			"172.31.31.229",
-			"172.31.19.76",
-            "172.31.31.67"];*/
             
         
-        this.proxies = [
+        /*this.proxies = [
             "172.31.24.47",
             "172.31.19.89",
             "172.31.17.87",
@@ -65,9 +44,10 @@ class Earl {
             "172.31.17.202",
             "172.31.17.108",
             "172.31.31.50"
-        ];
+        ];*/
 
-        this.go();
+        //this.go();
+        this.proxyConfig();
     }
 
     async go(ifname) {
@@ -139,7 +119,15 @@ class Earl {
     }
 
     getBestProxy(domain) {
-        let proxies = shuffle(this.proxies);
+        let proxiesList = [];
+        for(let i = 0; i < this.proxies.lengh; i++) {
+            if(this.proxies[i].state === "running") {
+                proxiesList.push(this.proxies[i].ip);
+            }
+        }
+
+
+        let proxies = shuffle(proxiesList);
         let res = [];
 
         for(let i = 0; i < proxies.length; i++) {
@@ -220,7 +208,146 @@ class Earl {
             this.workers[i].postMessage({"go": true});
         }
     }
+
+    proxyConfig() {
+        getProxies((instances) => {
+            console.log("here are the instances");
+            console.log(instances);
+            this.proxies = instances;
+            
+            // this.go();
+
+            this.proxyLoop(0);
+        });
+    }
+
+    proxyLoop(idx) {
+        this.proxies[idx].state = "stopping";
+        setTimeout(() => {
+            restartProxy(this.proxies[idx].id, () => {
+                console.log("it has now been restarted");
+                this.proxyLoop(++idx % this.proxies.length);
+                this.proxies[idx].state = "running";
+            });
+        }, 500);
+    }
 }
 
-//let e = new Earl("/media/luke/277eaea3-2185-4341-a594-d0fe5146d917/twitter_urls/todos/11226.tsv", "results/0.tsv", 50);
-let e = new Earl("../xaa", "../res.tsv", 100);
+var AWS = require('aws-sdk');
+// Set the region 
+AWS.config.update({region: 'us-east-2'});
+
+// Create EC2 service object
+var ec2 = new AWS.EC2({apiVersion: '2016-11-15'});
+let e = new Earl("/media/luke/277eaea3-2185-4341-a594-d0fe5146d917/twitter_urls/todos/11226.tsv", "results/0.tsv", 50);
+//let e = new Earl("../xaa", "../res.tsv", 100);
+
+// Load the AWS SDK for Node.js
+
+function getProxies(cb) {
+    var params = {
+        DryRun: false,
+        Filters: [{Name: 'tag:Name', Values: ['squid*']}]
+    };
+
+    // Call EC2 to retrieve policy for selected bucket
+    ec2.describeInstances(params, function(err, data) {
+        let instances = [];
+
+        if(err) {
+            console.log("Error", err.stack);
+        } 
+        else {
+            //console.log("Success", JSON.stringify(data));
+
+            for(let i = 0; i < data.Reservations.length; i++) {
+                for(let j = 0; j < data.Reservations[i].Instances.length; j++) {
+                    let instance = data.Reservations[i].Instances[j];
+                    let ip = instance.PrivateIpAddress;
+                    let state = instance.State.Name;
+                    let id = instance.InstanceId;
+                    console.log(ip + " (" + id + "): " + state);
+                    instances.push({"ip": ip, "state": state, "id": id});
+                }
+            }
+
+            cb(instances);
+        }
+    });
+}
+
+function restartProxy(id, cb) {
+    var params = {
+        InstanceIds: [id],
+        DryRun: false
+    };
+
+    ec2.stopInstances(params, function(err, data) {
+        if(err) {
+            console.log("Error", err);
+            cb("error");
+        } 
+        else if (data) {
+            console.log("Success", data.StoppingInstances);
+            checkState(id, "stopped", (state) => {
+                console.log("The instance is now stopped");
+                startProxy(id, () => {
+                    console.log("We're running!");
+                    cb("success");
+                });
+            });
+        }
+    });
+}
+
+function startProxy(id, cb) {
+    var params = {
+        InstanceIds: [id],
+        DryRun: false
+    };
+
+    ec2.startInstances(params, function(err, data) {
+        if(err) {
+            console.log("Error", err);
+        } 
+        else if (data) {
+            console.log("Success", data.StoppingInstances);
+            checkState(id, "running", (state) => {
+                console.log("The instance is now running again");
+                cb();
+            });
+        }
+    });
+}
+
+function checkState(id, state, cb) {
+    var params = {
+        InstanceIds: [id],
+        DryRun: false
+    };
+
+    ec2.describeInstances(params, function(err, data) {
+        if(err) {
+            console.log("Error", err.stack);
+        } 
+        else {
+            for(let i = 0; i < data.Reservations.length; i++) {
+                for(let j = 0; j < data.Reservations[i].Instances.length; j++) {
+                    let instance = data.Reservations[i].Instances[j];
+                    let currState = instance.State.Name;
+                    if(currState === state) {
+                        cb(state);
+                    }
+                    else {
+                        setTimeout(() => {
+                            checkState(id, state, cb);
+                        }, 1000);
+                    }
+                    break;
+                }
+            }
+        }
+    });
+}
+
+//getProxies();
