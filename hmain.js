@@ -223,4 +223,4 @@ class Earl {
 }
 
 //let e = new Earl("/media/luke/277eaea3-2185-4341-a594-d0fe5146d917/twitter_urls/todos/11226.tsv", "results/0.tsv", 50);
-let e = new Earl("../xaa", "../res.tsv", 100);
+let e = new Earl("../febshuf.tsv", "../res.tsv", 100);

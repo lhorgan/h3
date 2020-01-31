@@ -298,7 +298,7 @@ class UrlProcessor {
                 options["headers"] = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
                                       'Connection': 'keep-alive', 'Accept-Language': 'en-US', 'Accept': '*/*'};
                 options["gzip"] = true;
-                options["proxy"] = "http://" + proxy + ":8888";
+                options["proxy"] = "http://" + proxy + ":3128";
                 //console.log("The hit begins");
                 let responseSize = 0;
                 let aborted = false; // just to prevent repeat aborts while the file keeps downloading
