@@ -21,32 +21,7 @@ class Earl {
         this.readstream = new lineByLine(ifname);
         this.urlCount = 0;
         this.allLinesRead = false;
-            
-        
-        /*this.proxies = [
-            "172.31.24.47",
-            "172.31.19.89",
-            "172.31.17.87",
-            "172.31.24.140",
-            "172.31.20.114",
-            "172.31.30.230",
-            "172.31.21.195",
-            "172.31.26.7",
-            "172.31.20.206",
-            "172.31.23.140",
-            "172.31.20.8",
-            "172.31.26.163",
-            "172.31.29.169",
-            "172.31.28.8",
-            "172.31.23.127",
-            "172.31.19.38",
-            "172.31.24.220",
-            "172.31.17.202",
-            "172.31.17.108",
-            "172.31.31.50"
-        ];*/
 
-        //this.go();
         this.proxyConfig();
     }
 
@@ -331,7 +306,7 @@ function checkState(id, state, cb) {
     ec2.describeInstances(params, function(err, data) {
         if(err) {
             console.log("Error", err.stack);
-        } 
+        }
         else {
             for(let i = 0; i < data.Reservations.length; i++) {
                 for(let j = 0; j < data.Reservations[i].Instances.length; j++) {
@@ -352,5 +327,17 @@ function checkState(id, state, cb) {
     });
 }
 
-//let e = new Earl("/media/luke/277eaea3-2185-4341-a594-d0fe5146d917/twitter_urls/todos/11226.tsv", "results/0.tsv", 50);
-let e = new Earl("/home/admin/dec2017/dec2017shuf.tsv", "../dec2017.tsv", 150);
+//let e = new Earl("/home/admin/dec2017/dec2017shuf.tsv", "../dec2017.tsv", 150);
+
+const storage = require('node-persist');
+async function stressTestNodePersistWrite(ifname) {
+    await storage.init({"dir": "urls_cache"});
+    let readstream = new lineByLine(ifname);
+    let line = this.readstream.next();
+    if(line) {
+        await storage.setItem(line, "");
+    }
+    console.log("All lines written");
+}
+
+stressTestNodePersistWrite("todo");
