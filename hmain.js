@@ -330,14 +330,29 @@ function checkState(id, state, cb) {
 //let e = new Earl("/home/admin/dec2017/dec2017shuf.tsv", "../dec2017.tsv", 150);
 
 const storage = require('node-persist');
+var level = require('level');
+
 async function stressTestNodePersistWrite(ifname) {
-    await storage.init({"dir": "urls_cache"});
+    var db = level("test-db");
     let readstream = new lineByLine(ifname);
-    let line = this.readstream.next();
-    if(line) {
-        await storage.setItem(line, "");
+    let line = readstream.next();
+    let ctr = 0;
+    while(line) {
+        if(ctr % 10000 === 0) {
+	    console.log(ctr);
+	}
+	ctr++;
+        await db.put(line.toString("utf-8"), "");
+	line = readstream.next();
     }
     console.log("All lines written");
+    await db.close();
 }
 
-stressTestNodePersistWrite("todo");
+async function begin() {
+    console.log("Beginning");
+    await stressTestNodePersistWrite("../2018_shuf.tsv");
+}
+
+begin();
+
