@@ -9,8 +9,10 @@ const shuffle = require('shuffle-array');
 const micro = require("microtime");
 const TIME_TO_WAIT = 1000000;
 
+var level = require('level');
+
 class Earl {
-    constructor(ifname, results_name, binSize) {
+    constructor(ifname, results_name, binSize, dbname) {
         this.dispatchedURLIndex = 0;
         this.processedURLIndex = 0;
         this.binSize = binSize; 
@@ -21,6 +23,8 @@ class Earl {
         this.readstream = new lineByLine(ifname);
         this.urlCount = 0;
         this.allLinesRead = false;
+
+        this.db = level(dbname);
 
         this.proxyConfig();
     }
@@ -121,23 +125,33 @@ class Earl {
         return res;
     }
 
-    getNextURL() {
+    async getNextURL() {
         let line = this.readstream.next();
-        if(line) {
-            this.urlCount++;
-            line =  line.toString("utf-8");
-            let [url, year] = line.trim().split("\t");
-            if(!year) {
-                year = 2020;
+
+        while(true) { // this'll just keep going 'til we find something that isn't in the database
+            if(line) {
+                this.urlCount++;
+                line =  line.toString("utf-8");
+                let [url, year] = line.trim().split("\t");
+
+                let inDB = await db.get(url)
+                                .then((value) => { return true })
+                                .catch((err) => { return false });
+                
+                if(!inDB) {
+                    if(!year) {
+                        year = 2020;
+                    }
+                    return [url, year];
+                }
             }
-            return [url, year];
-        }
-        else {
-            if(this.allLinesRead === false) {
-                console.log("End of file reached!");
+            else {
+                if(this.allLinesRead === false) {
+                    console.log("End of file reached!");
+                }
+                this.allLinesRead = true;
+                return [null, null];
             }
-            this.allLinesRead = true;
-            return [null, null];
         }
     }
 
@@ -286,12 +300,13 @@ function startProxy(id, cb) {
     ec2.startInstances(params, function(err, data) {
         if(err) {
             console.log("Error", err);
+            cb("error");
         } 
         else if (data) {
             console.log("Success", data.StoppingInstances);
             checkState(id, "running", (state) => {
                 console.log("The instance is now running again");
-                cb();
+                cb("success");
             });
         }
     });
@@ -326,33 +341,4 @@ function checkState(id, state, cb) {
         }
     });
 }
-
-//let e = new Earl("/home/admin/dec2017/dec2017shuf.tsv", "../dec2017.tsv", 150);
-
-const storage = require('node-persist');
-var level = require('level');
-
-async function stressTestNodePersistWrite(ifname) {
-    var db = level("test-db");
-    let readstream = new lineByLine(ifname);
-    let line = readstream.next();
-    let ctr = 0;
-    while(line) {
-        if(ctr % 10000 === 0) {
-	    console.log(ctr);
-	}
-	ctr++;
-        await db.put(line.toString("utf-8"), "");
-	line = readstream.next();
-    }
-    console.log("All lines written");
-    await db.close();
-}
-
-async function begin() {
-    console.log("Beginning");
-    await stressTestNodePersistWrite("../2018_shuf.tsv");
-}
-
-begin();
 
