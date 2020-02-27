@@ -31,7 +31,7 @@ class Earl {
 
     async go(ifname) {
         this.workers = this.makeWorkers();
-        this.initialAssignWorkers();
+        await this.initialAssignWorkers();
         //console.log("workers assigned");
     }
 
@@ -79,7 +79,7 @@ class Earl {
 
             this.processedURLIndex++;
 
-            let [url, year] = this.getNextURL();
+            let [url, year] = await this.getNextURL();
             if(url) {
                 worker.postMessage({"url": url, "queue": false, "year": year});
                 this.dispatchedURLIndex++;
@@ -181,11 +181,11 @@ class Earl {
         stream.end();
     }
 
-    initialAssignWorkers() {
+    async initialAssignWorkers() {
         console.log("ASSINGING WORKERS");
         for(let i = 0; i < this.binSize; i++) {
             for(let j = 0; j < this.workers.length; j++) {
-                let [url, year] = this.getNextURL(this.readstream);
+                let [url, year] = await this.getNextURL(this.readstream);
                 if(url) {
                     console.log("URL: " + url);
                     this.workers[j].postMessage({"url": url, "queue": false, "year": year});
