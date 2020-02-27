@@ -43,7 +43,7 @@ class Earl {
 
         for(let i = 0; i < os.cpus().length; i++) {
             let worker = new Worker("./h.js", {});
-            worker.on("message", (message) => {
+            worker.on("message", async (message) => {
                 //console.log("we got a message in the main thread");
                 await this.handleWorkerMessage(message, worker);
             });
@@ -134,7 +134,7 @@ class Earl {
                 line =  line.toString("utf-8");
                 let [url, year] = line.trim().split("\t");
 
-                let inDB = await db.get(url)
+                let inDB = await this.db.get(url)
                                 .then((value) => { return true })
                                 .catch((err) => { return false });
                 
@@ -176,7 +176,7 @@ class Earl {
             }
             urlStr += "\r\n";
 
-            db.put(urlsCopy[i].origURL, "", () => {});
+            this.db.put(urlsCopy[i].origURL, "", () => {});
         }
 
         var stream = fs.createWriteStream(this.results_name, {flags:'a'});
@@ -243,7 +243,7 @@ let e = new Earl("../2018_shuf.tsv", "", 100, "2018db");
 function getProxies(cb) {
     var params = {
         DryRun: false,
-        Filters: [{Name: 'tag:Name', Values: ['squid*']}]
+        Filters: [{Name: 'tag:Name', Values: ['dog*']}]
     };
 
     // Call EC2 to retrieve policy for selected bucket
