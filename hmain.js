@@ -172,6 +172,8 @@ class Earl {
                 urlStr += "\t" + '"' + urlsCopy[i].errorMessage + '"';
             }
             urlStr += "\r\n";
+
+            db.put(urlsCopy[i].origURL, "", () => {});
         }
 
         var stream = fs.createWriteStream(this.results_name, {flags:'a'});
@@ -341,4 +343,3 @@ function checkState(id, state, cb) {
         }
     });
 }
-
