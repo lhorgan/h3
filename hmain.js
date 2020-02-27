@@ -126,9 +126,9 @@ class Earl {
     }
 
     async getNextURL() {
-        let line = this.readstream.next();
-
         while(true) { // this'll just keep going 'til we find something that isn't in the database
+            let line = this.readstream.next();
+
             if(line) {
                 this.urlCount++;
                 line =  line.toString("utf-8");
@@ -144,9 +144,9 @@ class Earl {
                     }
                     return [url, year];
                 }
-		else {
-		    console.log("We already processed " + url);
-		}
+                else {
+                    console.log("We already processed " + url);
+                }
             }
             else {
                 if(this.allLinesRead === false) {
