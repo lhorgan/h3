@@ -30,12 +30,12 @@ class Earl {
     }
 
     async go(ifname) {
-        this.workers = this.makeWorkers();
+        this.workers = await this.makeWorkers();
         await this.initialAssignWorkers();
         //console.log("workers assigned");
     }
 
-    makeWorkers() {
+    async makeWorkers() {
         let workers = [];
         //os.cpus().length
 
@@ -45,14 +45,14 @@ class Earl {
             let worker = new Worker("./h.js", {});
             worker.on("message", (message) => {
                 //console.log("we got a message in the main thread");
-                this.handleWorkerMessage(message, worker);
+                await this.handleWorkerMessage(message, worker);
             });
             workers.push(worker);
         }
         return workers;
     }
 
-    handleWorkerMessage(message, worker) {
+    async handleWorkerMessage(message, worker) {
         //console.log(JSON.stringify(message));
         if(message["kind"] === "lastAccessed") {
             let domain = message["domain"];
