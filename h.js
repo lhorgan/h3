@@ -307,8 +307,8 @@ class UrlProcessor {
             let timeToDelay = Math.max(TIME_TO_WAIT - (micro.now() - timeOfLastAccess), 0);
             timeToDelay *= (1 + Math.random());
 
-            //console.log("DELAYING " + timeToDelay / 1000 + " milliseconds");
-            await this.delay(timeToDelay);
+            //console.log("DELAYING " + (timeToDelay / 1000) + " milliseconds because " + url + " was accessed at " + (timeOfLastAccess / 1000));
+            await this.delay(timeToDelay / 1000);
             //console.log("Delay over");
             return this.hitURL(url, options);
         }
