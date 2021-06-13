@@ -161,13 +161,18 @@ class UrlProcessor {
             if(typeof(err) === "object") {
                 err = err.toString();
             }
-            //console.log("Error on " + entry.url);
+            console.log("Error on " + entry.url);
             //console.log("\n");
             //console.log("\n\n" + err + "\n\n");
             if(!(entry.url in this.errors)) {
                 this.errors[entry.url] = 0;
             }
-            this.errors[entry.url] += 1;
+	    if(err == "Error: ESOCKETTIMEDOUT") {
+		console.log("socket error");
+	    }
+	    else {
+                this.errors[entry.url] += 1;
+	    }
 
             if(this.errors[entry.url] >= this.maxRetries) {
                 //console.log("Max retry limit for " + entry.url + " exceeded.");
@@ -299,6 +304,8 @@ class UrlProcessor {
                                       'Connection': 'keep-alive', 'Accept-Language': 'en-US', 'Accept': '*/*'};
                 options["gzip"] = true;
                 options["proxy"] = "http://" + proxy + ":3128";
+		options["agent"] = false;
+		//options["pool"] = {maxSockets: 1000};
                 //console.log("The hit begins");
                 let responseSize = 0;
                 let aborted = false; // just to prevent repeat aborts while the file keeps downloading

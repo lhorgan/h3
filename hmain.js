@@ -118,6 +118,7 @@ class Earl {
             }
             res = [proxies[i], time];
             if((micro.now() - time) > TIME_TO_WAIT) {
+		console.log("We are using " + res);
                 return res;
             }
         }
@@ -236,7 +237,7 @@ AWS.config.update({region: 'us-east-2'});
 // Create EC2 service object
 var ec2 = new AWS.EC2({apiVersion: '2016-11-15'});
 //let e = new Earl("/media/luke/277eaea3-2185-4341-a594-d0fe5146d917/twitter_urls/todos/11226.tsv", "results/0.tsv", 50);
-let e = new Earl("../2018_shuf.tsv", "../2018_res2.tsv", 100, "2018db");
+let e = new Earl("../2018_shuf.tsv", "xyz.tsv", 1000, "xyz");
 
 // Load the AWS SDK for Node.js
 
